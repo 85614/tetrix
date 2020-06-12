@@ -137,10 +137,10 @@ void TetrixBoard::paintEvent(QPaintEvent *event)
     QRect rect = contentsRect();
 //! [7]
 
-    if (isPaused) {
-        painter.drawText(rect, Qt::AlignCenter, tr("Pause"));
-        return;
-    }
+//    if (isPaused) {
+//        painter.drawText(rect, Qt::AlignCenter, tr("Pause"));
+//        return;
+//    }
 
 //! [8]
     int boardTop = rect.bottom() - BoardHeight*squareHeight();
@@ -407,6 +407,8 @@ void TetrixBoard::drawSquare(QPainter &painter, int x, int y, TetrixShape shape)
     };
 
     QColor color = colorTable[int(shape)];
+    color = Qt::blue;
+    color = color.lighter();
     painter.fillRect(x + 1, y + 1, squareWidth() - 2, squareHeight() - 2,
                      color);
 
