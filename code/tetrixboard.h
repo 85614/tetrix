@@ -117,10 +117,7 @@ private:
     bool isStarted;
     bool isPaused;
     bool isWaitingAfterLine;
-//    TetrixPiece curPiece;
-//    TetrixPiece nextPiece;
-//    int curX;
-//    int curY;
+
 
     QList<TetrixPiece> pieceList;
     TetrixPiece noShpePiece;
