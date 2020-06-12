@@ -272,11 +272,11 @@ void TetrixBoard::pieceDropped(int dropHeight)
     }
 
     ++numPiecesDropped;
-    if (numPiecesDropped % 25 == 0) {
-        ++level;
-        timer.start(timeoutTime(), this);
-        emit levelChanged(level);
-    }
+//    if (numPiecesDropped % 25 == 0) {
+//        ++level;
+//        timer.start(timeoutTime(), this);
+//        emit levelChanged(level);
+//    }
 
     score += dropHeight + 7;
     emit scoreChanged(score);
