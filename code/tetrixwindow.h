@@ -76,6 +76,7 @@ private:
     QLCDNumber *scoreLcd;
     QLCDNumber *levelLcd;
     QLCDNumber *linesLcd;
+    QLCDNumber *timeLcd;
     QPushButton *startButton;
     QPushButton *quitButton;
     QPushButton *pauseButton;

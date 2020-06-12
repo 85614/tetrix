@@ -67,6 +67,10 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     nextPieceLabel->setAlignment(Qt::AlignCenter);
     board->setNextPieceLabel(nextPieceLabel);
 //! [1]
+    timeLcd = new QLCDNumber(5);
+    timeLcd->setSegmentStyle(QLCDNumber::Filled);
+    timeLcd->setDigitCount(8);
+    timeLcd->display("00:00:00");
     scoreLcd = new QLCDNumber(5);
     scoreLcd->setSegmentStyle(QLCDNumber::Filled);
 //! [1]
@@ -96,6 +100,8 @@ TetrixWindow::TetrixWindow(QWidget *parent)
             levelLcd, qOverload<int>(&QLCDNumber::display));
     connect(board, &TetrixBoard::linesRemovedChanged,
             linesLcd, qOverload<int>(&QLCDNumber::display));
+    connect(board,&TetrixBoard::timechanged,timeLcd,qOverload<const QString&>(&QLCDNumber::display));
+
 #else
     connect(board, &TetrixBoard::scoreChanged,
             scoreLcd, QOverload<int>::of(&QLCDNumber::display));
@@ -108,8 +114,11 @@ TetrixWindow::TetrixWindow(QWidget *parent)
 
 //! [6]
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget(createLabel(tr("NEXT")), 0, 0);
-    layout->addWidget(nextPieceLabel, 1, 0);
+
+    layout->addWidget(createLabel(tr("TIME")), 0, 0);
+//    layout->addWidget(nextPieceLabel, 1, 0);
+
+    layout->addWidget(timeLcd, 1, 0);
     layout->addWidget(createLabel(tr("LEVEL")), 2, 0);
     layout->addWidget(levelLcd, 3, 0);
     layout->addWidget(startButton, 4, 0);

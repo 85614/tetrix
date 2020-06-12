@@ -56,7 +56,7 @@
 #include <QPointer>
 
 #include "tetrixpiece.h"
-
+#include <QList>
 QT_BEGIN_NAMESPACE
 class QLabel;
 QT_END_NAMESPACE
@@ -77,10 +77,12 @@ public slots:
     void start();
     void pause();
 
+
 signals:
     void scoreChanged(int score);
     void levelChanged(int level);
     void linesRemovedChanged(int numLines);
+    void timechanged(const QString &s);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -90,36 +92,59 @@ protected:
 
 //! [1]
 private:
-    enum { BoardWidth = 10, BoardHeight = 22 };
+
+    TetrixPiece getNextPiece()const;
+
+    enum { BoardWidth = 10, BoardHeight = 20 };
 
     TetrixShape &shapeAt(int x, int y) { return board[(y * BoardWidth) + x]; }
-    int timeoutTime() { return 1000 / (1 + level); }
+    int timeoutTime() { return 500; }
     int squareWidth() { return contentsRect().width() / BoardWidth; }
     int squareHeight() { return contentsRect().height() / BoardHeight; }
     void clearBoard();
     void dropDown();
-    void oneLineDown();
+    void oneLineDownFirst();
+    void oneLineDownAll();
     void pieceDropped(int dropHeight);
     void removeFullLines();
     void newPiece();
-    void showNextPiece();
-    bool tryMove(const TetrixPiece &newPiece, int newX, int newY);
+    bool tryMove(const TetrixPiece &newPiece, int newX, int newY,bool first=true);
     void drawSquare(QPainter &painter, int x, int y, TetrixShape shape);
 
     QBasicTimer timer;
+
     QPointer<QLabel> nextPieceLabel;
     bool isStarted;
     bool isPaused;
     bool isWaitingAfterLine;
-    TetrixPiece curPiece;
-    TetrixPiece nextPiece;
-    int curX;
-    int curY;
+//    TetrixPiece curPiece;
+//    TetrixPiece nextPiece;
+//    int curX;
+//    int curY;
+
+    QList<TetrixPiece> pieceList;
+    TetrixPiece noShpePiece;
+    TetrixPiece& curPiece(){return pieceList.empty()?noShpePiece:pieceList.front();}
+    int& curX(){return curPiece().siteX();}
+    int& curY(){return curPiece().siteY();}
     int numLinesRemoved;
     int numPiecesDropped;
     int score;
     int level;
     TetrixShape board[BoardWidth * BoardHeight];
+
+
+    //闪烁部分
+    QBasicTimer flash_timer;
+    enum{no_flash,need_flash,flash_1,flash_2,flash_3,end_flash};
+    int flash_status = no_flash;
+    bool isFull[BoardHeight];
+
+    //时间部分
+    int time_gap = 3;
+    QBasicTimer timer2;
+    qlonglong t=0;
+    QString timeToString(qlonglong t);
 };
 //! [1]
 

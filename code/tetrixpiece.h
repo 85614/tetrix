@@ -72,13 +72,16 @@ public:
     int maxY() const;
     TetrixPiece rotatedLeft() const;
     TetrixPiece rotatedRight() const;
-
+    int& siteX(){return curX;}
+    int& siteY(){return curY;}
 private:
     void setX(int index, int x) { coords[index][0] = x; }
     void setY(int index, int y) { coords[index][1] = y; }
 
     TetrixShape pieceShape;
     int coords[4][2];
+    int curX;
+    int curY;
 };
 //! [0]
 
