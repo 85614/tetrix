@@ -1,52 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
 
 #include "tetrixboard.h"
 
@@ -64,21 +15,10 @@ TetrixBoard::TetrixBoard(QWidget *parent)
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
     setFocusPolicy(Qt::StrongFocus);
     clearBoard();
-
-//    nextPiece.setRandomShape();
     for(bool&b:isFull)
         b = false;
 }
-//! [0]
 
-//! [1]
-void TetrixBoard::setNextPieceLabel(QLabel *label)
-{
-    nextPieceLabel = label;
-}
-//! [1]
-
-//! [2]
 QSize TetrixBoard::sizeHint() const
 {
     return QSize(BoardWidth * 15 + frameWidth() * 2,
@@ -86,7 +26,6 @@ QSize TetrixBoard::sizeHint() const
 }
 
 QSize TetrixBoard::minimumSizeHint() const
-//! [2] //! [3]
 {
     return QSize(BoardWidth * 5 + frameWidth() * 2,
                  BoardHeight * 5 + frameWidth() * 2);
@@ -100,21 +39,20 @@ void TetrixBoard::start()
         return;
     t= 0;
     isStarted = true;
-    isWaitingAfterLine = false;
     numLinesRemoved = 0;
     numPiecesDropped = 0;
     score = 0;
-    level = 1;
     clearBoard();
 
-    emit linesRemovedChanged(numLinesRemoved);
+    emit timechanged("00:00");
+    emit piecesRemovedChanged(numPiecesDropped);
     emit scoreChanged(score);
-    emit levelChanged(level);
+    emit levelChanged(_Level);
 
 
     newPiece();
-    timer.start(timeoutTime(), this);
-    timer2.start(1000,this);
+    timer.start(dropTime(), this);
+    timer_per_second.start(1000,this);
 }
 //! [4]
 
@@ -127,10 +65,10 @@ void TetrixBoard::pause()
     isPaused = !isPaused;
     if (isPaused) {
         timer.stop();
-        timer2.stop();
+        timer_per_second.stop();
     } else {
-        timer.start(timeoutTime(), this);
-        timer2.start(1000,this);
+        timer.start(dropTime(), this);
+        timer_per_second.start(1000,this);
     }
     update();
     //! [5] //! [6]
@@ -148,14 +86,7 @@ void TetrixBoard::paintEvent(QPaintEvent *event)
     QFrame::paintEvent(event);
     QPainter painter(this);
     QRect rect = contentsRect();
-//! [7]
 
-//    if (isPaused) {
-//        painter.drawText(rect, Qt::AlignCenter, tr("Pause"));
-//        return;
-//    }
-
-//! [8]
     int boardTop = rect.bottom() - BoardHeight*squareHeight();
     if(flash_status!=0)
         qDebug()<<__func__<<"  "<<flash_status;
@@ -164,41 +95,27 @@ void TetrixBoard::paintEvent(QPaintEvent *event)
             TetrixShape shape = shapeAt(j, BoardHeight - i - 1);
             if (shape != NoShape ){
                 if(((flash_status&1)  && isFull[BoardHeight - i - 1])){
-                    qDebug()<<__func__ << " is full "<<BoardHeight - i - 1;
+                    //闪烁的暗时间
                     continue;
                 }
                 drawSquare(painter, rect.left() + j * squareWidth(),
                            boardTop + i * squareHeight(), shape);
             }
         }
-//! [8] //! [9]
     }
-//! [9]
-
-//! [10]
-
+    //绘制所有未下落的方块
     for(auto&piece:pieceList)
-    if (piece.shape() != NoShape) {
-        for (int i = 0; i < 4; ++i) {
-            int x = piece.siteX() + piece.x(i);
-            int y = piece.siteY() - piece.y(i);
-            drawSquare(painter, rect.left() + x * squareWidth(),
-                       boardTop + (BoardHeight - y - 1) * squareHeight(),
-                       piece.shape());
+        if (piece.shape() != NoShape) {
+            for (int i = 0; i < 4; ++i) {
+                int x = piece.siteX() + piece.x(i);
+                int y = piece.siteY() - piece.y(i);
+                drawSquare(painter, rect.left() + x * squareWidth(),
+                           boardTop + (BoardHeight - y - 1) * squareHeight(),
+                           piece.shape());
+            }
+
         }
 
-    }
-//    if (curPiece().shape() != NoShape) {
-//        for (int i = 0; i < 4; ++i) {
-//            int x = curX() + curPiece().x(i);
-//            int y = curY() - curPiece().y(i);
-//            drawSquare(painter, rect.left() + x * squareWidth(),
-//                       boardTop + (BoardHeight - y - 1) * squareHeight(),
-//                       curPiece().shape());
-//        }
-////! [10] //! [11]
-//    }
-//! [11] //! [12]
 }
 //! [12]
 
@@ -209,26 +126,27 @@ void TetrixBoard::keyPressEvent(QKeyEvent *event)
         QFrame::keyPressEvent(event);
         return;
     }
-//! [13]
-
-//! [14]
+//改了一下键
     switch (event->key()) {
     case Qt::Key_A:
     case Qt::Key_Left:
-        tryMove(curPiece(), curX() - 1, curY());
+        tryMoveLeft();
+//        tryMove(curPiece(), curX() - 1, curY());
         break;
     case Qt::Key_D:
     case Qt::Key_Right:
-        tryMove(curPiece(), curX() + 1, curY());
+//        tryMove(curPiece(), curX() + 1, curY());
+        tryMoveRight();
         break;
 
     case Qt::Key_Down:
-        tryMove(curPiece().rotatedRight(), curX(), curY());
+        rotatedRight();
+//        tryMove(curPiece().rotatedRight(), curX(), curY());
         break;
     case Qt::Key_W:
     case Qt::Key_Up:
-        qDebug()<<__func__<<curX()<<curY();
-        tryMove(curPiece().rotatedLeft(), curX(), curY());
+        rotatedLeft();
+//        tryMove(curPiece().rotatedLeft(), curX(), curY());
         break;
     case Qt::Key_Space:
         dropDown();
@@ -246,34 +164,31 @@ void TetrixBoard::keyPressEvent(QKeyEvent *event)
 //! [15]
 void TetrixBoard::timerEvent(QTimerEvent *event)
 {
-    if(event->timerId() == timer2.timerId()){
+    if(event->timerId() == timer_per_second.timerId()){
+        //是每秒的计时事件
         ++t;
         emit timechanged(timeToString(t));
         if(t%time_gap==0)
             newPiece();
     }
     else if(event->timerId() == flash_timer.timerId()){
+        //是闪烁的计事件
         if(flash_status!=no_flash){
             ++flash_status;
             repaint();
             if(flash_status==end_flash){
-                timer.start(timeoutTime(), this);
+                timer.start(dropTime(), this);
                 removeFullLines();
                 return;
             }
         }
     }
     else if (event->timerId() == timer.timerId()) {
-        /*if (isWaitingAfterLine) {
-            isWaitingAfterLine = false;
-            timer.start(timeoutTime(), this);
-        } else*/
-        {
+        //是下落的计时事件
             oneLineDownAll();
-        }
     } else{
+        //父类处理
         QFrame::timerEvent(event);
-//! [15] //! [16]
     }
     //! [16] //! [17]
 }
@@ -308,7 +223,7 @@ void TetrixBoard::dropDown()
         --newY;
         ++dropHeight;
     }
-    pieceDropped(dropHeight);
+    pieceDropped();
 //! [19] //! [20]
 }
 //! [20]
@@ -317,7 +232,7 @@ void TetrixBoard::dropDown()
 void TetrixBoard::oneLineDownFirst()
 {
     if (!tryMove(curPiece(), curX(), curY() - 1))
-        pieceDropped(0);
+        pieceDropped();
 
 }
 void TetrixBoard::oneLineDownAll(){
@@ -333,7 +248,7 @@ void TetrixBoard::oneLineDownAll(){
 //! [21]
 
 //! [22]
-void TetrixBoard::pieceDropped(int dropHeight)
+void TetrixBoard::pieceDropped()
 {
     for (int i = 0; i < 4; ++i) {
         int x = curX() + curPiece().x(i);
@@ -342,15 +257,9 @@ void TetrixBoard::pieceDropped(int dropHeight)
     }
 
     ++numPiecesDropped;
-//    if (numPiecesDropped % 25 == 0) {
-//        ++level;
-//        timer.start(timeoutTime(), this);
-//        emit levelChanged(level);
-//    }
+    emit piecesRemovedChanged(numPiecesDropped);
     if(!pieceList.empty())
         pieceList.pop_front();
-    score += dropHeight + 7;
-    emit scoreChanged(score);
     removeFullLines();
 
 //! [22] //! [23]
@@ -389,7 +298,7 @@ void TetrixBoard::removeFullLines()
         }
         flash_status = no_flash;
         flash_timer.stop();
-        qDebug()<<__func__<<" begin delete";
+//        qDebug()<<__func__<<" begin delete";
         int numFullLines=0;
         for(int i = 0;i<BoardHeight;){
             if(isFull[i])
@@ -411,15 +320,11 @@ void TetrixBoard::removeFullLines()
                 ++i;
             }
         }
-        qDebug()<<__func__<<" begin delete over";
+//        qDebug()<<__func__<<" begin delete over";
         numLinesRemoved += numFullLines;
-        score += 10 * numFullLines;
-        emit linesRemovedChanged(numLinesRemoved);
+        score += BoardWidth * numFullLines;
+        emit piecesRemovedChanged(numPiecesDropped);
         emit scoreChanged(score);
-
-//        timer.start(timeoutTime(), this);
-//        isWaitingAfterLine = true;
-//        curPiece().setShape(NoShape);
         update();
     }
 //! [28] //! [29]
@@ -429,11 +334,8 @@ void TetrixBoard::removeFullLines()
 //! [30]
 void TetrixBoard::newPiece()
 {
-    qDebug()<<__func__<<t;
+//    qDebug()<<__func__<<t;
     TetrixPiece piece =getNextPiece();
-//    curPiece() = nextPiece;
-//    nextPiece.setRandomShape();
-//    showNextPiece();
     {
         int curX = BoardWidth / 2 + 1;
         int curY = BoardHeight - 1 + piece.minY();
@@ -445,36 +347,24 @@ void TetrixBoard::newPiece()
         pieceList.append(piece);
     }
     if (!tryMove(curPiece(), curX(), curY())) {
-//        curPiece().setShape(NoShape);
-//        pieceList.front().setShape(NoShape);
         qDebug()<<__func__<<"pieceList.clear()";
         pieceList.clear();
         timer.stop();
-        timer2.stop();
+        timer_per_second.stop();
         isStarted = false;
     }
-//! [30] //! [31]
 }
-//! [31]
 
-//! [33]
-
-//! [34]
 bool TetrixBoard::tryMove(const TetrixPiece &newPiece, int newX, int newY,bool first)
 {
     for (int i = 0; i < 4; ++i) {
         int x = newX + newPiece.x(i);
         int y = newY - newPiece.y(i);
-//        qDebug()<<__func__<<newX<<newY<<x<<y;
         if (x < 0 || x >= BoardWidth || y < 0 || y >= BoardHeight)
             return false;
         if (shapeAt(x, y) != NoShape)
             return false;
     }
-//! [34]
-//    qDebug()<<"to be update";
-//! [35]
-
     TetrixPiece &piece = const_cast<TetrixPiece&>(newPiece);
     piece.siteX() = newX;
     piece.siteY() = newY;
@@ -517,11 +407,9 @@ void TetrixBoard::drawSquare(QPainter &painter, int x, int y, TetrixShape shape)
 
 QString TetrixBoard::timeToString(qlonglong t2)
 {
-    qlonglong h = t2/3600;
-    t2 %= 3600;
     qlonglong m = t2/60;
     t2 %= 60;
     QLatin1Char fill('0');
-    return QString("%1:%2:%3").arg(h,2,10,fill).arg(m,2,10,fill).arg(t2,2,10,fill);
+    return QString("%1:%2").arg(m,2,10,fill).arg(t2,2,10,fill);
 }
 //! [36]
