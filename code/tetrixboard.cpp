@@ -17,6 +17,18 @@ TetrixBoard::TetrixBoard(QWidget *parent)
     clearBoard();
     for(bool&b:isFull)
         b = false;
+    if(_Level==easy){
+        time_gap = 5;
+        qDebug()<<"难度为简单！";
+    }
+    else if(_Level==normal){
+        time_gap = 3;
+        qDebug()<<"难度为普通！";
+    }
+    else if(_Level==hard){
+        time_gap = 1;
+        qDebug()<<"难度为困难！";
+    }
 }
 
 QSize TetrixBoard::sizeHint() const
@@ -33,6 +45,7 @@ QSize TetrixBoard::minimumSizeHint() const
 //! [3]
 
 //! [4]
+//游戏开始
 void TetrixBoard::start()
 {
     if (isPaused)
@@ -59,6 +72,7 @@ void TetrixBoard::start()
 //! [5]
 void TetrixBoard::pause()
 {
+    qDebug()<<"尝试暂停";
     if (!isStarted)
         return;
 
@@ -92,7 +106,7 @@ void TetrixBoard::paintEvent(QPaintEvent *event)
         qDebug()<<__func__<<"  "<<flash_status;
     for (int i = 0; i < BoardHeight; ++i) {
         for (int j = 0; j < BoardWidth; ++j) {
-            TetrixShape shape = shapeAt(j, BoardHeight - i - 1);
+            BlockShape shape = shapeAt(j, BoardHeight - i - 1);
             if (shape != NoShape ){
                 if(((flash_status&1)  && isFull[BoardHeight - i - 1])){
                     //闪烁的暗时间
@@ -107,8 +121,8 @@ void TetrixBoard::paintEvent(QPaintEvent *event)
     for(auto&piece:pieceList)
         if (piece.shape() != NoShape) {
             for (int i = 0; i < 4; ++i) {
-                int x = piece.siteX() + piece.x(i);
-                int y = piece.siteY() - piece.y(i);
+                int x = piece.siteX() + piece.getX(i);
+                int y = piece.siteY() - piece.getY(i);
                 drawSquare(painter, rect.left() + x * squareWidth(),
                            boardTop + (BoardHeight - y - 1) * squareHeight(),
                            piece.shape());
@@ -235,6 +249,14 @@ void TetrixBoard::oneLineDownFirst()
         pieceDropped();
 
 }
+
+bool TetrixBoard::isFilled(int x, int y)
+{
+    int pos = x*BoardWidth + y;
+    if (board[pos]==NoShape)
+        return false;
+    else return true;
+}
 void TetrixBoard::oneLineDownAll(){
 
     for(TetrixPiece&piece:pieceList){
@@ -251,8 +273,8 @@ void TetrixBoard::oneLineDownAll(){
 void TetrixBoard::pieceDropped()
 {
     for (int i = 0; i < 4; ++i) {
-        int x = curX() + curPiece().x(i);
-        int y = curY() - curPiece().y(i);
+        int x = curX() + curPiece().getX(i);
+        int y = curY() - curPiece().getY(i);
         shapeAt(x, y) = curPiece().shape();
     }
 
@@ -337,8 +359,8 @@ void TetrixBoard::newPiece()
 //    qDebug()<<__func__<<t;
     TetrixPiece piece =getNextPiece();
     {
-        int curX = BoardWidth / 2 + 1;
-        int curY = BoardHeight - 1 + piece.minY();
+        int curX = BoardWidth / 2 ;
+        int curY = BoardHeight - 1 + piece.getBottomBound();
 
         piece.siteX()=curX;
         piece.siteY()=curY;
@@ -358,8 +380,8 @@ void TetrixBoard::newPiece()
 bool TetrixBoard::tryMove(const TetrixPiece &newPiece, int newX, int newY,bool first)
 {
     for (int i = 0; i < 4; ++i) {
-        int x = newX + newPiece.x(i);
-        int y = newY - newPiece.y(i);
+        int x = newX + newPiece.getX(i);
+        int y = newY - newPiece.getY(i);
         if (x < 0 || x >= BoardWidth || y < 0 || y >= BoardHeight)
             return false;
         if (shapeAt(x, y) != NoShape)
@@ -376,7 +398,7 @@ bool TetrixBoard::tryMove(const TetrixPiece &newPiece, int newX, int newY,bool f
 //! [35]
 
 //! [36]
-void TetrixBoard::drawSquare(QPainter &painter, int x, int y, TetrixShape shape)
+void TetrixBoard::drawSquare(QPainter &painter, int x, int y, BlockShape shape)
 {
     static constexpr QRgb colorTable[8] = {
         0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
@@ -387,7 +409,7 @@ void TetrixBoard::drawSquare(QPainter &painter, int x, int y, TetrixShape shape)
     color = colorTable[int(shape)];
     color = Qt::blue;
     color = color.lighter();
-    if(shape==TetrixShape::NoShape)
+    if(shape==BlockShape::NoShape)
         color = QRgb(0x000000);
     painter.fillRect(x + 1, y + 1, squareWidth() - 2, squareHeight() - 2,
                      color);

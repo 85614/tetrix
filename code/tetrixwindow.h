@@ -52,7 +52,6 @@
 #define TETRIXWINDOW_H
 
 #include <QWidget>
-
 QT_BEGIN_NAMESPACE
 class QLCDNumber;
 class QLabel;
@@ -67,12 +66,10 @@ class TetrixWindow : public QWidget
 
 public:
     TetrixWindow(QWidget *parent = nullptr);
-
 private:
     QLabel *createLabel(const QString &text);
 
     TetrixBoard *board;
-    QLabel *nextPieceLabel;
     QLCDNumber *scoreLcd;
     QLCDNumber *levelLcd;
     QLCDNumber *linesLcd;
@@ -80,6 +77,7 @@ private:
     QPushButton *startButton;
     QPushButton *quitButton;
     QPushButton *pauseButton;
+
 };
 //! [0]
 

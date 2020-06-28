@@ -49,9 +49,9 @@
 ****************************************************************************/
 
 #include "tetrixwindow.h"
-
 #include <QApplication>
-
+#include<QDebug>
+#include<QBasicTimer>
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);

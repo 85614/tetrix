@@ -49,105 +49,159 @@
 ****************************************************************************/
 
 #include "tetrixpiece.h"
-
-#include <QtCore>
+#include<stdlib.h>
+#include<qdebug.h>
+//#include <QtCore>
 
 //! [0]
 void TetrixPiece::setRandomShape()
 {
-    setShape(TetrixShape(QRandomGenerator::global()->bounded(7) + 1));
+    //随机设置一种形状，这里+1是为了跳过第一个NoShape
+    BlockShape ranShape = BlockShape(rand()%5+1);
+    setShape(ranShape);
 }
 //! [0]
 
 //! [1]
-void TetrixPiece::setShape(TetrixShape shape)
+void TetrixPiece::setShape(BlockShape shape)
 {
-    static constexpr int coordsTable[8][4][2] = {
-        { { 0, 0 },   { 0, 0 },   { 0, 0 },   { 0, 0 } },
-        { { 0, -1 },  { 0, 0 },   { -1, 0 },  { -1, 1 } },
-        { { 0, -1 },  { 0, 0 },   { 1, 0 },   { 1, 1 } },
-        { { 0, -1 },  { 0, 0 },   { 0, 1 },   { 0, 2 } },
-        { { -1, 0 },  { 0, 0 },   { 1, 0 },   { 0, 1 } },
-        { { 0, 0 },   { 1, 0 },   { 0, 1 },   { 1, 1 } },
-        { { -1, -1 }, { 0, -1 },  { 0, 0 },   { 0, 1 } },
-        { { 1, -1 },  { 0, -1 },  { 0, 0 },   { 0, 1 } }
+    static constexpr int coordsTable[6][4][2] = {
+        //NoShape
+        {{0,0},{0,0},{0,0},{0,0}},
+        //LineShape
+        {{0,0},{0,1},{0,2},{0,3}},
+        //LShape
+        {{0,0},{1,0},{1,1},{1,2}},
+        //TShape
+        {{0,0},{0,1},{0,2},{1,1}},
+        //ZShape
+        {{0,0},{0,1},{1,1},{1,2}},
+        //OShape
+        {{0,0},{0,1},{1,0},{1,1}}
     };
 
     for (int i = 0; i < 4 ; i++) {
         for (int j = 0; j < 2; ++j)
             coords[i][j] = coordsTable[shape][i][j];
     }
-    pieceShape = shape;
+    blockShape = shape;
 //! [1] //! [2]
 }
+
+int TetrixPiece::getX(int index) const { return coords[index][0]; }
+
+int TetrixPiece::getY(int index) const { return coords[index][1]; }
 //! [2]
 
 //! [3]
-int TetrixPiece::minX() const
+int TetrixPiece::getLeftBound() const
 {
-    int min = coords[0][0];
-    for (int i = 1; i < 4; ++i)
-        min = qMin(min, coords[i][0]);
-    return min;
+    int leftbound = coords[0][0];
+    for (int i = 0; i < 4; i++)
+    {
+        if (coords[i][0]<leftbound)
+        {
+            leftbound = coords[i][0];
+        }
+    }
+    return leftbound;
 }
 
-int TetrixPiece::maxX() const
+int TetrixPiece::getRightBound() const
 //! [3] //! [4]
 {
-    int max = coords[0][0];
-    for (int i = 1; i < 4; ++i)
-        max = qMax(max, coords[i][0]);
-    return max;
+    int rightbound = coords[0][0];
+    for (int i = 0; i < 4; i++)
+    {
+        if (coords[i][0] > rightbound)
+        {
+            rightbound = coords[i][0];
+        }
+    }
+    return rightbound;
 }
 //! [4]
 
 //! [5]
-int TetrixPiece::minY() const
+int TetrixPiece::getBottomBound() const
 {
-    int min = coords[0][1];
-    for (int i = 1; i < 4; ++i)
-        min = qMin(min, coords[i][1]);
-    return min;
+    int bottombound = coords[0][1];
+        for (int i = 0; i < 4; i++)
+        {
+            if (coords[i][1]<bottombound)
+            {
+                bottombound = coords[i][1];
+            }
+        }
+        return bottombound;
 }
 
-int TetrixPiece::maxY() const
+int TetrixPiece::getUpBound() const
 //! [5] //! [6]
 {
-    int max = coords[0][1];
-    for (int i = 1; i < 4; ++i)
-        max = qMax(max, coords[i][1]);
-    return max;
+    int upbound = coords[0][1];
+        for (int i = 0; i < 4; i++)
+        {
+            if (coords[i][1]<upbound)
+            {
+                upbound = coords[i][1];
+            }
+        }
+        return upbound;
 }
 //! [6]
 
 //! [7]
-TetrixPiece TetrixPiece::rotatedLeft() const
+TetrixPiece TetrixPiece::leftRotate() const
 {
-    if (pieceShape == SquareShape)
+    if (blockShape == OShape)
         return *this;
 
     TetrixPiece result;
-    result.pieceShape = pieceShape;
+    result.blockShape = blockShape;
     for (int i = 0; i < 4; ++i) {
-        result.setX(i, y(i));
-        result.setY(i, -x(i));
+        result.setX(i, -getY(i));
+        result.setY(i, getX(i));
+    }
+    int leftbound = result.getLeftBound();
+    int upbound = result.getUpBound();
+    if(leftbound!=0){
+        int xdlb = -leftbound;
+        for(int i=0;i<4;i++){
+            result.coords[i][0]+=xdlb;
+        }
+    }
+    if(upbound!=0){
+        qDebug()<<"upbound:"<<upbound;
+        int xdub = -upbound;
+        for(int i=0;i<4;i++){
+            result.coords[i][1]+=xdub;
+        }
+    }
+    qDebug()<<"旋转后坐标：";
+    for(int i=0;i<4;i++){
+        qDebug()<<result.coords[i][0]<<result.coords[i][1];
     }
 //! [7]
     return result;
 }
 
 //! [9]
-TetrixPiece TetrixPiece::rotatedRight() const
+TetrixPiece TetrixPiece::rightRotate() const
 {
-    if (pieceShape == SquareShape)
+    if (blockShape == OShape)
         return *this;
 
     TetrixPiece result;
-    result.pieceShape = pieceShape;
+    result.blockShape = blockShape;
     for (int i = 0; i < 4; ++i) {
-        result.setX(i, -y(i));
-        result.setY(i, x(i));
+        result.setX(i, getY(i));
+        result.setY(i, getX(i));
     }
 //! [9]
     return result;
 }
+
+void TetrixPiece::setX(int index, int x) { coords[index][0] = x; }
+
+void TetrixPiece::setY(int index, int y) { coords[index][1] = y; }

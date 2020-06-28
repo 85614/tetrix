@@ -107,8 +107,10 @@ TetrixWindow::TetrixWindow(QWidget *parent)
             scoreLcd, QOverload<int>::of(&QLCDNumber::display));
     connect(board, &TetrixBoard::levelChanged,
             levelLcd, QOverload<int>::of(&QLCDNumber::display));
-    connect(board, &TetrixBoard::linesRemovedChanged,
+    connect(board, &TetrixBoard::piecesRemovedChanged,
             linesLcd, QOverload<int>::of(&QLCDNumber::display));
+    connect(board,&TetrixBoard::timechanged,timeLcd,QOverload<const QString&>(&QLCDNumber::display));
+
 #endif
 //! [5]
 
@@ -116,8 +118,6 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     QGridLayout *layout = new QGridLayout;
 
     layout->addWidget(createLabel(tr("TIME")), 0, 0);
-//    layout->addWidget(nextPieceLabel, 1, 0);
-
     layout->addWidget(timeLcd, 1, 0);
     layout->addWidget(createLabel(tr("LEVEL")), 2, 0);
     layout->addWidget(levelLcd, 3, 0);

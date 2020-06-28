@@ -1,58 +1,8 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
 
 #ifndef TETRIXPIECE_H
 #define TETRIXPIECE_H
 
-enum TetrixShape { NoShape, ZShape, SShape, LineShape, TShape, SquareShape,
-                   LShape, MirroredLShape };
+enum BlockShape { NoShape,LineShape,LShape,TShape,ZShape,OShape };
 
 //! [0]
 class TetrixPiece
@@ -61,24 +11,29 @@ public:
     TetrixPiece() { setShape(NoShape); }
 
     void setRandomShape();
-    void setShape(TetrixShape shape);
+    void setShape(BlockShape shape);
 
-    TetrixShape shape() const { return pieceShape; }
-    int x(int index) const { return coords[index][0]; }
-    int y(int index) const { return coords[index][1]; }
-    int minX() const;
-    int maxX() const;
-    int minY() const;
-    int maxY() const;
-    TetrixPiece rotatedLeft() const;
-    TetrixPiece rotatedRight() const;
+    BlockShape shape() const { return blockShape; }
+    //得到某一行的X或Y坐标
+    int getX(int index) const;
+    int getY(int index) const;
+    //得到方块的上下左右四个边界
+    int getLeftBound() const;
+    int getRightBound() const;
+    int getBottomBound() const;
+    int getUpBound() const;
+    //方块的左旋和右旋
+    TetrixPiece leftRotate() const;
+    TetrixPiece rightRotate() const;
+    //获取方块目前所在的位置的坐标
     int& siteX(){return curX;}
     int& siteY(){return curY;}
 private:
-    void setX(int index, int x) { coords[index][0] = x; }
-    void setY(int index, int y) { coords[index][1] = y; }
+    //更改第某个坐标的点X或Y坐标
+    void setX(int index, int x);
+    void setY(int index, int y);
 
-    TetrixShape pieceShape;
+    BlockShape blockShape;
     int coords[4][2];
     int curX;
     int curY;

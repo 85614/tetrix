@@ -5,6 +5,7 @@ HEADERS       = tetrixboard.h \
                 tetrixpiece.h \
                 tetrixwindow.h
 SOURCES       = main.cpp \
+                game.cpp \
                 tetrixboard.cpp \
                 tetrixpiece.cpp \
                 tetrixwindow.cpp
