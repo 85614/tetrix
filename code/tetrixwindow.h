@@ -81,6 +81,8 @@ private:
     QPushButton *startButton;
     QPushButton *quitButton;
     QPushButton *pauseButton;
+    QPushButton *fileButton;
+
 
 };
 //! [0]

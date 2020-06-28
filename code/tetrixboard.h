@@ -41,10 +41,11 @@ public:
     TetrixPiece getCurPiece(){return curPiece();}
     bool isFilled(int x,int y);
 
+
 public slots:
     void start();
     void pause();
-
+    void changeFile();
 
 signals:
     void scoreChanged(int score);

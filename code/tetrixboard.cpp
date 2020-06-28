@@ -7,7 +7,8 @@
 #include <QDebug>
 #include <QMutex>
 #include <QWaitCondition>
-
+#include <QMessageBox>
+#include <QFileDialog>
 
 TetrixBoard::TetrixBoard(QWidget *parent)
     : QFrame(parent), isStarted(false), isPaused(false)
@@ -34,8 +35,7 @@ QSize TetrixBoard::minimumSizeHint() const
 //游戏开始
 void TetrixBoard::start()
 {
-    if (isPaused)
-        return;
+
     t= 0;
     isStarted = true;
     numLinesRemoved = 0;
@@ -47,6 +47,14 @@ void TetrixBoard::start()
     emit piecesRemovedChanged(numPiecesDropped);
     emit scoreChanged(score);
     emit levelChanged(_Level);
+
+    if(TetrixPiece::filename.isEmpty()){
+
+        qDebug()<<"no file";
+        changeFile();
+        if(TetrixPiece::filename.isEmpty())
+            return;
+    }
 
 
     newPiece();
@@ -70,6 +78,23 @@ void TetrixBoard::pause()
         timer_per_second.start(1000/speed_rate,this);
     }
     update();
+
+}
+
+void TetrixBoard::changeFile()
+{
+
+    QString filepath = QFileDialog::getOpenFileName(NULL, "请选择数据文件", "", "txt(*.txt)");
+        if (filepath.isEmpty())
+        {
+            QMessageBox::warning(NULL, "提示", "未选择数据文件", "确定");
+            return;
+        }
+        else {
+            TetrixPiece::filename = filepath;
+        }
+    number = 1;
+    qDebug()<<TetrixPiece::filename;
 
 }
 

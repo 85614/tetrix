@@ -57,6 +57,7 @@
 #include <QLabel>
 #include <QLCDNumber>
 #include <QPushButton>
+#include "tetrixpiece.h"
 
 
 TetrixWindow::TetrixWindow(QWidget *parent)
@@ -82,6 +83,8 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     changeLevelButton->setFocusPolicy(Qt::NoFocus);
     startButton = new QPushButton(tr("&Start"));
     startButton->setFocusPolicy(Qt::NoFocus);
+    fileButton = new QPushButton(tr("&file"));
+    fileButton->setFocusPolicy(Qt::NoFocus);
     quitButton = new QPushButton(tr("&Quit"));
     quitButton->setFocusPolicy(Qt::NoFocus);
     pauseButton = new QPushButton(tr("&Pause"));
@@ -90,6 +93,7 @@ TetrixWindow::TetrixWindow(QWidget *parent)
 
 
     connect(startButton, &QPushButton::clicked, board, &TetrixBoard::start);
+    connect(fileButton, &QPushButton::clicked, board, &TetrixBoard::changeFile);
     connect(changeLevelButton, &QPushButton::clicked, game,&Game::levelchange);
 
     connect(quitButton , &QPushButton::clicked, qApp, &QCoreApplication::quit);
@@ -114,6 +118,7 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     layout->addWidget(levelLcd, 3, 0);
     layout->addWidget(startButton, 5, 0);
     layout->addWidget(changeLevelButton, 4, 0);
+    layout->addWidget(fileButton, 6, 0);
     layout->addWidget(board, 0, 1, 6, 1);
     layout->addWidget(createLabel(tr("SCORE")), 0, 2);
     layout->addWidget(scoreLcd, 1, 2);

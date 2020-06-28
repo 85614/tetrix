@@ -38,6 +38,8 @@ public:
     //获取方块目前所在的位置的坐标
     int& siteX(){return curX;}
     int& siteY(){return curY;}
+
+    static QString filename ;
 private:
     //更改第某个坐标的点X或Y坐标
     void setX(int index, int x);
@@ -48,6 +50,8 @@ private:
     int curX;
     int curY;
 };
-//! [0]
+
+
+
 
 #endif

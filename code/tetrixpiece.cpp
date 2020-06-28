@@ -57,11 +57,15 @@
 //! [0]
 //!
 
+QString TetrixPiece::filename = "";
+
 void ReadLine()
 
 {
    if(number==1)
-   { QFile file("D:\\test\\normal.txt");
+   {
+
+       QFile file(TetrixPiece::filename);
 
     if (file.open(QIODevice::ReadOnly ))
     {
