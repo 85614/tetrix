@@ -58,7 +58,7 @@ void TetrixBoard::start()
     clearBoard();
 
     emit timechanged("00:00");
-    emit piecesRemovedChanged(numPiecesDropped);
+    emit piecesDropedChanged(numPiecesDropped);
     emit scoreChanged(score);
     emit levelChanged(_Level);
 
@@ -279,7 +279,7 @@ void TetrixBoard::pieceDropped()
     }
 
     ++numPiecesDropped;
-    emit piecesRemovedChanged(numPiecesDropped);
+    emit piecesDropedChanged(numPiecesDropped);
     if(!pieceList.empty())
         pieceList.pop_front();
     removeFullLines();
@@ -345,7 +345,7 @@ void TetrixBoard::removeFullLines()
 //        qDebug()<<__func__<<" begin delete over";
         numLinesRemoved += numFullLines;
         score += BoardWidth * numFullLines;
-        emit piecesRemovedChanged(numPiecesDropped);
+        emit piecesDropedChanged(numPiecesDropped);
         emit scoreChanged(score);
         update();
     }

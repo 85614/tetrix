@@ -47,7 +47,7 @@ public slots:
 signals:
     void scoreChanged(int score);
     void levelChanged(int _Level);
-    void piecesRemovedChanged(int numLines);
+    void piecesDropedChanged(int piecesDrop);
     void timechanged(const QString &s);
 
 protected:
