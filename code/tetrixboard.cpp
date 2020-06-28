@@ -53,7 +53,6 @@ void TetrixBoard::start()
 //
     drop_timer.start(dropTime(), this);
     timer_per_second.start(1000/speed_rate,this);
-    level(hard);
 }
 
 void TetrixBoard::pause()
