@@ -62,6 +62,8 @@ protected:
 private:
 
     int speed_rate =1;//speed_rate倍的速度
+
+
     TetrixPiece getNextPiece()const;//用于重新实现以完成文件输入，未完成
 
     BlockShape &shapeAt(int x, int y) { return board[(y * BoardWidth) + x]; }

@@ -117,7 +117,7 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     layout->addWidget(board, 0, 1, 6, 1);
     layout->addWidget(createLabel(tr("SCORE")), 0, 2);
     layout->addWidget(scoreLcd, 1, 2);
-    layout->addWidget(createLabel(tr("PIECES REDROPED")), 2, 2);
+    layout->addWidget(createLabel(tr("PIECES DROPED")), 2, 2);
     layout->addWidget(linesLcd, 3, 2);
     layout->addWidget(quitButton, 4, 2);
     layout->addWidget(pauseButton, 5, 2);
