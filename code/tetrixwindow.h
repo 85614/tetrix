@@ -58,6 +58,7 @@ class QLabel;
 class QPushButton;
 QT_END_NAMESPACE
 class TetrixBoard;
+class AI;
 
 //! [0]
 class TetrixWindow : public QWidget
@@ -66,10 +67,12 @@ class TetrixWindow : public QWidget
 
 public:
     TetrixWindow(QWidget *parent = nullptr);
+        TetrixBoard *board;
 private:
     QLabel *createLabel(const QString &text);
 
-    TetrixBoard *board;
+
+    AI *ai;
     QLCDNumber *scoreLcd;
     QLCDNumber *levelLcd;
     QLCDNumber *linesLcd;

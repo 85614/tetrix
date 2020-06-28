@@ -2,9 +2,9 @@
 using namespace std;
 
 
-Game::Game(TetrixBoard *t)
+Game::Game(TetrixBoard &t)
 {
-    this->tboard = t;
+    this->tboard = &t;
 }
 
 void Game::moveLeft()

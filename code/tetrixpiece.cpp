@@ -128,7 +128,7 @@ int TetrixPiece::getBottomBound() const
     int bottombound = coords[0][1];
         for (int i = 0; i < 4; i++)
         {
-            if (coords[i][1]<bottombound)
+            if (coords[i][1]>bottombound)
             {
                 bottombound = coords[i][1];
             }
@@ -172,16 +172,16 @@ TetrixPiece TetrixPiece::leftRotate() const
         }
     }
     if(upbound!=0){
-        qDebug()<<"upbound:"<<upbound;
+//        qDebug()<<"upbound:"<<upbound;
         int xdub = -upbound;
         for(int i=0;i<4;i++){
             result.coords[i][1]+=xdub;
         }
     }
-    qDebug()<<"旋转后坐标：";
-    for(int i=0;i<4;i++){
-        qDebug()<<result.coords[i][0]<<result.coords[i][1];
-    }
+//    qDebug()<<"旋转后坐标：";
+//    for(int i=0;i<4;i++){
+//        qDebug()<<result.coords[i][0]<<result.coords[i][1];
+//    }
 //! [7]
     return result;
 }

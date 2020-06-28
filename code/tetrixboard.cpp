@@ -1,6 +1,6 @@
 
 #include "tetrixboard.h"
-
+#include<QDebug>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QPainter>
@@ -15,6 +15,7 @@ TetrixBoard::TetrixBoard(QWidget *parent)
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
     setFocusPolicy(Qt::StrongFocus);
     clearBoard();
+    level(hard);
     for(bool&b:isFull)
         b = false;
     if(_Level==easy){
@@ -58,7 +59,7 @@ void TetrixBoard::start()
     clearBoard();
 
     emit timechanged("00:00");
-    emit piecesDropedChanged(numPiecesDropped);
+    emit piecesRemovedChanged(numPiecesDropped);
     emit scoreChanged(score);
     emit levelChanged(_Level);
 
@@ -184,6 +185,7 @@ void TetrixBoard::timerEvent(QTimerEvent *event)
         emit timechanged(timeToString(t));
         if(t%time_gap==0)
             newPiece();
+        //=================
     }
     else if(event->timerId() == flash_timer.timerId()){
         //是闪烁的计事件
@@ -207,12 +209,6 @@ void TetrixBoard::timerEvent(QTimerEvent *event)
     //! [16] //! [17]
 }
 
-TetrixPiece TetrixBoard::getNextPiece() const
-{
-     TetrixPiece ans;
-     ans.setRandomShape();
-     return ans;
-}
 
 
 //! [17]
@@ -231,6 +227,7 @@ void TetrixBoard::dropDown()
 {
     int dropHeight = 0;
     int newY = curY();
+    qDebug()<<pieceList.empty()<<" "<<"newY"<<newY;
     while (newY > 0) {
         if (!tryMove(curPiece(), curX(), newY - 1))
             break;
@@ -247,7 +244,10 @@ void TetrixBoard::oneLineDownFirst()
 {
     if (!tryMove(curPiece(), curX(), curY() - 1))
         pieceDropped();
-
+    if(dropcount>1){
+        emit piecesRemovedChanged(numPiecesDropped);
+    }
+    ++dropcount;
 }
 
 bool TetrixBoard::isFilled(int x, int y)
@@ -279,9 +279,12 @@ void TetrixBoard::pieceDropped()
     }
 
     ++numPiecesDropped;
-    emit piecesDropedChanged(numPiecesDropped);
-    if(!pieceList.empty())
+    if(!pieceList.empty()){
         pieceList.pop_front();
+        dropcount = 0;
+    }
+    emit piecesRemovedChanged(numPiecesDropped);
+
     removeFullLines();
 
 //! [22] //! [23]
@@ -345,7 +348,7 @@ void TetrixBoard::removeFullLines()
 //        qDebug()<<__func__<<" begin delete over";
         numLinesRemoved += numFullLines;
         score += BoardWidth * numFullLines;
-        emit piecesDropedChanged(numPiecesDropped);
+        emit piecesRemovedChanged(numPiecesDropped);
         emit scoreChanged(score);
         update();
     }
@@ -360,7 +363,7 @@ void TetrixBoard::newPiece()
     TetrixPiece piece =getNextPiece();
     {
         int curX = BoardWidth / 2 ;
-        int curY = BoardHeight - 1 + piece.getBottomBound();
+        int curY = BoardHeight - 1 + piece.getUpBound();
 
         piece.siteX()=curX;
         piece.siteY()=curY;

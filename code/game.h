@@ -1,17 +1,17 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include"tetrixpiece.h"
-#include"tetrixboard.h"
+
 #include"QTextStream"
 #include"QFile"
-
+#include<tetrixboard.h>
+#include<tetrixpiece.h>
 
 //为ＡＩ组准备的最基础的功能接口　实现了最基本的一些操作功能
 //ＡＩ组也可以根据自己的需求定义实现新的函数
-class Game{
+class Game:public QObject{
 public:
-    Game(TetrixBoard *tborad);
+    Game(TetrixBoard &tborad);
     enum Level{easy,normal,challenge};
 
     void start(){
@@ -43,9 +43,9 @@ public:
     //返回目前正在操纵的方块对象
     TetrixPiece getCurTetrixPiece();
 
+
     bool isFilled(int i,int j);//判断目前某一个方块是否被填充
 
-private:
     TetrixBoard *tboard;
 
 };

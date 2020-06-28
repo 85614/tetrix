@@ -50,6 +50,7 @@
 
 #include "tetrixboard.h"
 #include "tetrixwindow.h"
+#include "ai.h"
 
 #include <QCoreApplication>
 #include <QGridLayout>
@@ -67,6 +68,10 @@ TetrixWindow::TetrixWindow(QWidget *parent)
 //    nextPieceLabel->setAlignment(Qt::AlignCenter);
 //    board->setNextPieceLabel(nextPieceLabel);
 //! [1]
+//!
+//!
+    Game *game = new Game(*board);
+    AI *ai = new AI(*game);
     timeLcd = new QLCDNumber(5);
     timeLcd->setSegmentStyle(QLCDNumber::Filled);
     timeLcd->setDigitCount(8);
@@ -93,23 +98,26 @@ TetrixWindow::TetrixWindow(QWidget *parent)
 //! [4] //! [5]
     connect(quitButton , &QPushButton::clicked, qApp, &QCoreApplication::quit);
     connect(pauseButton, &QPushButton::clicked, board, &TetrixBoard::pause);
+    connect(board,&TetrixBoard::piecesRemovedChanged,
+            ai,&AI::operate);
 #if __cplusplus >= 201402L
     connect(board, &TetrixBoard::scoreChanged,
             scoreLcd, qOverload<int>(&QLCDNumber::display));
     connect(board, &TetrixBoard::levelChanged,
             levelLcd, qOverload<int>(&QLCDNumber::display));
-    connect(board, &TetrixBoard::piecesDropedChanged,
+    connect(board, &TetrixBoard::piecesRemovedChanged,
             linesLcd, qOverload<int>(&QLCDNumber::display));
     connect(board,&TetrixBoard::timechanged,timeLcd,qOverload<const QString&>(&QLCDNumber::display));
 
 #else
     connect(board, &TetrixBoard::scoreChanged,
-            scoreLcd, QOverload<int>::of(&QLCDNumber::display));
+            scoreLcd, qOverload<int>(&QLCDNumber::display));
     connect(board, &TetrixBoard::levelChanged,
-            levelLcd, QOverload<int>::of(&QLCDNumber::display));
+            levelLcd, qOverload<int>(&QLCDNumber::display));
     connect(board, &TetrixBoard::piecesRemovedChanged,
-            linesLcd, QOverload<int>::of(&QLCDNumber::display));
-    connect(board,&TetrixBoard::timechanged,timeLcd,QOverload<const QString&>(&QLCDNumber::display));
+            linesLcd, qOverload<int>(&QLCDNumber::display));
+    connect(board,&TetrixBoard::timechanged,timeLcd,qOverload<const QString&>(&QLCDNumber::display));
+
 
 #endif
 //! [5]
@@ -125,7 +133,7 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     layout->addWidget(board, 0, 1, 6, 1);
     layout->addWidget(createLabel(tr("SCORE")), 0, 2);
     layout->addWidget(scoreLcd, 1, 2);
-    layout->addWidget(createLabel(tr("PIECES REDROPED")), 2, 2);
+    layout->addWidget(createLabel(tr("PIECES REMOVED")), 2, 2);
     layout->addWidget(linesLcd, 3, 2);
     layout->addWidget(quitButton, 4, 2);
     layout->addWidget(pauseButton, 5, 2);

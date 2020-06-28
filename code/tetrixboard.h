@@ -8,10 +8,12 @@
 #include <QPointer>
 
 #include "tetrixpiece.h"
+
 #include <QList>
 QT_BEGIN_NAMESPACE
 class QLabel;
 QT_END_NAMESPACE
+
 
 //! [0]
 class TetrixBoard : public QFrame
@@ -47,7 +49,7 @@ public slots:
 signals:
     void scoreChanged(int score);
     void levelChanged(int _Level);
-    void piecesDropedChanged(int piecesDrop);
+    void piecesRemovedChanged(int numLines);
     void timechanged(const QString &s);
 
 protected:
@@ -116,7 +118,12 @@ private:
     QBasicTimer timer_per_second;//每秒计时
     qlonglong t=0;//游戏的时间
     QString timeToString(qlonglong t);//时间转成字符串格式
+
+    int dropcount = 0;
 };
 //! [1]
 
 #endif
+
+
+

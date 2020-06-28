@@ -49,6 +49,7 @@
 ****************************************************************************/
 
 #include "tetrixwindow.h"
+#include"ai.h"
 #include <QApplication>
 #include<QDebug>
 #include<QBasicTimer>
