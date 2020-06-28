@@ -6,7 +6,7 @@
 #include <QBasicTimer>
 #include <QFrame>
 #include <QPointer>
-
+#include <QDebug>
 #include "tetrixpiece.h"
 
 #include <QList>
@@ -31,7 +31,7 @@ public:
     void oneLineDownFirst();//最下方的方块下落一格
 
     Level level(){return _Level;}//难度
-    Level level(Level newLevel){Level old = level();_Level = newLevel;return old;}
+    Level level(Level newLevel);
     bool tryMoveLeft(){return tryMove(curPiece(), curX() - 1, curY());}
     bool tryMoveRight(){return tryMove(curPiece(), curX() + 1, curY());}
     bool rotatedRight(){return tryMove(curPiece().rightRotate(), curX(), curY());}
@@ -61,10 +61,11 @@ protected:
 //! [1]
 private:
 
+    int speed_rate =1;//1/10的速度
     TetrixPiece getNextPiece()const;//用于重新实现以完成文件输入，未完成
 
     BlockShape &shapeAt(int x, int y) { return board[(y * BoardWidth) + x]; }
-    int dropTime() { static constexpr int dropTimes[3]{500,300,200};return dropTimes[_Level]; }
+    int dropTime() { static constexpr int dropTimes[3]{500,300,200};return dropTimes[_Level]/speed_rate ; }
     int pieceOccerTime(){static constexpr int times[]{5,3,1};return times[_Level];}
     int squareWidth() { return contentsRect().width() / BoardWidth; }//一格的宽
     int squareHeight() { return contentsRect().height() / BoardHeight; }//一格的高
@@ -80,7 +81,7 @@ private:
     void drawSquare(QPainter &painter, int x, int y, BlockShape shape);//画一格正方形
 
 
-    QBasicTimer timer;//用于下落的计时器
+    QBasicTimer drop_timer;//用于下落的计时器
     bool isStarted;
     bool isPaused;
 
@@ -95,7 +96,7 @@ private:
     int numLinesRemoved;//已填满的行数
     int numPiecesDropped;//已落下的方块数，
     int score;//分数，文件2.1题目描述说“程序的得分是所消解的栅格的总数”
-    Level _Level = easy;//难度,需要变成“容易”“适中”“挑战”来显示，未完成
+    Level _Level = easy ;//难度,需要变成“容易”“适中”“挑战”来显示，未完成
     BlockShape board[BoardWidth * BoardHeight];
     //其实它这个Shape只是为了颜色，不要也行
     //我这里只区分了noShape和其他
@@ -113,8 +114,7 @@ private:
 
     //时间部分
     //下降间隔计时
-    //简单：5000ms 适中：3000ms 挑战：1000ms
-    int time_gap = 5;//方块出现的时间间隔 默认为简单级别
+
     QBasicTimer timer_per_second;//每秒计时
     qlonglong t=0;//游戏的时间
     QString timeToString(qlonglong t);//时间转成字符串格式

@@ -8,28 +8,16 @@
 #include <QMutex>
 #include <QWaitCondition>
 
-//! [0]
+
 TetrixBoard::TetrixBoard(QWidget *parent)
     : QFrame(parent), isStarted(false), isPaused(false)
 {
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
     setFocusPolicy(Qt::StrongFocus);
     clearBoard();
-    level(hard);
     for(bool&b:isFull)
         b = false;
-    if(_Level==easy){
-        time_gap = 5;
-        qDebug()<<"难度为简单！";
-    }
-    else if(_Level==normal){
-        time_gap = 3;
-        qDebug()<<"难度为普通！";
-    }
-    else if(_Level==hard){
-        time_gap = 1;
-        qDebug()<<"难度为困难！";
-    }
+
 }
 
 QSize TetrixBoard::sizeHint() const
@@ -43,9 +31,6 @@ QSize TetrixBoard::minimumSizeHint() const
     return QSize(BoardWidth * 5 + frameWidth() * 2,
                  BoardHeight * 5 + frameWidth() * 2);
 }
-//! [3]
-
-//! [4]
 //游戏开始
 void TetrixBoard::start()
 {
@@ -65,12 +50,12 @@ void TetrixBoard::start()
 
 
     newPiece();
-    timer.start(dropTime(), this);
-    timer_per_second.start(1000,this);
+//
+    drop_timer.start(dropTime(), this);
+    timer_per_second.start(1000/speed_rate,this);
+    level(hard);
 }
-//! [4]
 
-//! [5]
 void TetrixBoard::pause()
 {
     qDebug()<<"尝试暂停";
@@ -79,19 +64,17 @@ void TetrixBoard::pause()
 
     isPaused = !isPaused;
     if (isPaused) {
-        timer.stop();
+        drop_timer.stop();
         timer_per_second.stop();
     } else {
-        timer.start(dropTime(), this);
-        timer_per_second.start(1000,this);
+        drop_timer.start(dropTime(), this);
+        timer_per_second.start(1000/speed_rate,this);
     }
     update();
-    //! [5] //! [6]
+
 }
 
-//! [6]
 
-//! [7]
 void TetrixBoard::paintEvent(QPaintEvent *event)
 {
 
@@ -132,9 +115,7 @@ void TetrixBoard::paintEvent(QPaintEvent *event)
         }
 
 }
-//! [12]
 
-//! [13]
 void TetrixBoard::keyPressEvent(QKeyEvent *event)
 {
     if (!isStarted || isPaused || curPiece().shape() == NoShape) {
@@ -173,17 +154,17 @@ void TetrixBoard::keyPressEvent(QKeyEvent *event)
     default:
         QFrame::keyPressEvent(event);
     }
-//! [14]
+
 }
 
-//! [15]
+
 void TetrixBoard::timerEvent(QTimerEvent *event)
 {
     if(event->timerId() == timer_per_second.timerId()){
         //是每秒的计时事件
         ++t;
         emit timechanged(timeToString(t));
-        if(t%time_gap==0)
+        if(t% pieceOccerTime() ==0)
             newPiece();
         //=================
     }
@@ -193,36 +174,40 @@ void TetrixBoard::timerEvent(QTimerEvent *event)
             ++flash_status;
             repaint();
             if(flash_status==end_flash){
-                timer.start(dropTime(), this);
+                drop_timer.start(dropTime(), this);
                 removeFullLines();
                 return;
             }
         }
     }
-    else if (event->timerId() == timer.timerId()) {
+    else if (event->timerId() == drop_timer.timerId()) {
         //是下落的计时事件
             oneLineDownAll();
     } else{
         //父类处理
         QFrame::timerEvent(event);
     }
-    //! [16] //! [17]
+
+}
+
+TetrixPiece TetrixBoard::getNextPiece() const
+{
+     ReadLine();
+     TetrixPiece ans;
+     //ans.setRandomShape();
+     ans.getnewShape();
+     return ans;
 }
 
 
 
-//! [17]
-
-//! [18]
 void TetrixBoard::clearBoard()
 {
     for (int i = 0; i < BoardHeight * BoardWidth; ++i)
         board[i] = NoShape;
     pieceList.clear();
 }
-//! [18]
 
-//! [19]
 void TetrixBoard::dropDown()
 {
     int dropHeight = 0;
@@ -235,11 +220,9 @@ void TetrixBoard::dropDown()
         ++dropHeight;
     }
     pieceDropped();
-//! [19] //! [20]
-}
-//! [20]
 
-//! [21]
+}
+
 void TetrixBoard::oneLineDownFirst()
 {
     if (!tryMove(curPiece(), curX(), curY() - 1))
@@ -248,6 +231,22 @@ void TetrixBoard::oneLineDownFirst()
         emit piecesRemovedChanged(numPiecesDropped);
     }
     ++dropcount;
+}
+
+TetrixBoard::Level TetrixBoard::level(TetrixBoard::Level newLevel){
+    Level old = level();_Level = newLevel;
+    emit levelChanged(newLevel);
+    _Level = newLevel;
+
+    qDebug()<<__func__<<1;
+    if(drop_timer.isActive())
+    {
+        qDebug()<<__func__<<2;
+        drop_timer.stop();
+        drop_timer.start(dropTime()/speed_rate,this);
+        qDebug()<<dropTime();
+    }
+    return old;
 }
 
 bool TetrixBoard::isFilled(int x, int y)
@@ -267,9 +266,7 @@ void TetrixBoard::oneLineDownAll(){
     }
 }
 
-//! [21]
 
-//! [22]
 void TetrixBoard::pieceDropped()
 {
     for (int i = 0; i < 4; ++i) {
@@ -287,11 +284,11 @@ void TetrixBoard::pieceDropped()
 
     removeFullLines();
 
-//! [22] //! [23]
-}
-//! [23]
 
-//! [24]
+}
+
+
+
 void TetrixBoard::removeFullLines()
 {
     //mycode
@@ -310,7 +307,7 @@ void TetrixBoard::removeFullLines()
             }
         }
 
-//! [28]
+
     if(flash_status!=no_flash) {
         switch (flash_status) {
         case end_flash:
@@ -352,11 +349,9 @@ void TetrixBoard::removeFullLines()
         emit scoreChanged(score);
         update();
     }
-//! [28] //! [29]
-}
-//! [29]
 
-//! [30]
+}
+
 void TetrixBoard::newPiece()
 {
 //    qDebug()<<__func__<<t;
@@ -374,7 +369,7 @@ void TetrixBoard::newPiece()
     if (!tryMove(curPiece(), curX(), curY())) {
         qDebug()<<__func__<<"pieceList.clear()";
         pieceList.clear();
-        timer.stop();
+        drop_timer.stop();
         timer_per_second.stop();
         isStarted = false;
     }
@@ -398,9 +393,7 @@ bool TetrixBoard::tryMove(const TetrixPiece &newPiece, int newX, int newY,bool f
     update();
     return true;
 }
-//! [35]
 
-//! [36]
 void TetrixBoard::drawSquare(QPainter &painter, int x, int y, BlockShape shape)
 {
     static constexpr QRgb colorTable[8] = {
@@ -437,4 +430,4 @@ QString TetrixBoard::timeToString(qlonglong t2)
     QLatin1Char fill('0');
     return QString("%1:%2").arg(m,2,10,fill).arg(t2,2,10,fill);
 }
-//! [36]
+

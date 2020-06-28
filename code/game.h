@@ -10,8 +10,10 @@
 //为ＡＩ组准备的最基础的功能接口　实现了最基本的一些操作功能
 //ＡＩ组也可以根据自己的需求定义实现新的函数
 class Game:public QObject{
+    Q_OBJECT
 public:
     Game(TetrixBoard &tborad);
+    ~Game(){}
     enum Level{easy,normal,challenge};
 
     void start(){
@@ -47,6 +49,9 @@ public:
     bool isFilled(int i,int j);//判断目前某一个方块是否被填充
 
     TetrixBoard *tboard;
+
+public slots:
+    void levelchange();
 
 };
 

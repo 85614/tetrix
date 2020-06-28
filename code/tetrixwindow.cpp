@@ -58,18 +58,11 @@
 #include <QLCDNumber>
 #include <QPushButton>
 
-//! [0]
+
 TetrixWindow::TetrixWindow(QWidget *parent)
     : QWidget(parent), board(new TetrixBoard)
 {
-//! [0]
-//    nextPieceLabel = new QLabel;
-//    nextPieceLabel->setFrameStyle(QFrame::Box | QFrame::Raised);
-//    nextPieceLabel->setAlignment(Qt::AlignCenter);
-//    board->setNextPieceLabel(nextPieceLabel);
-//! [1]
-//!
-//!
+
     Game *game = new Game(*board);
     AI *ai = new AI(*game);
     timeLcd = new QLCDNumber(5);
@@ -78,38 +71,32 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     timeLcd->display("00:00");
     scoreLcd = new QLCDNumber(5);
     scoreLcd->setSegmentStyle(QLCDNumber::Filled);
-//! [1]
+
     levelLcd = new QLCDNumber(2);
     levelLcd->setSegmentStyle(QLCDNumber::Filled);
     linesLcd = new QLCDNumber(5);
     linesLcd->setSegmentStyle(QLCDNumber::Filled);
 
-//! [2]
+
+    changeLevelButton = new QPushButton(tr("&changeLevel"));
+    changeLevelButton->setFocusPolicy(Qt::NoFocus);
     startButton = new QPushButton(tr("&Start"));
     startButton->setFocusPolicy(Qt::NoFocus);
     quitButton = new QPushButton(tr("&Quit"));
     quitButton->setFocusPolicy(Qt::NoFocus);
     pauseButton = new QPushButton(tr("&Pause"));
-//! [2] //! [3]
+
     pauseButton->setFocusPolicy(Qt::NoFocus);
-//! [3] //! [4]
+
 
     connect(startButton, &QPushButton::clicked, board, &TetrixBoard::start);
-//! [4] //! [5]
+    connect(changeLevelButton, &QPushButton::clicked, game,&Game::levelchange);
+
     connect(quitButton , &QPushButton::clicked, qApp, &QCoreApplication::quit);
     connect(pauseButton, &QPushButton::clicked, board, &TetrixBoard::pause);
     connect(board,&TetrixBoard::piecesRemovedChanged,
             ai,&AI::operate);
-#if __cplusplus >= 201402L
-    connect(board, &TetrixBoard::scoreChanged,
-            scoreLcd, qOverload<int>(&QLCDNumber::display));
-    connect(board, &TetrixBoard::levelChanged,
-            levelLcd, qOverload<int>(&QLCDNumber::display));
-    connect(board, &TetrixBoard::piecesRemovedChanged,
-            linesLcd, qOverload<int>(&QLCDNumber::display));
-    connect(board,&TetrixBoard::timechanged,timeLcd,qOverload<const QString&>(&QLCDNumber::display));
 
-#else
     connect(board, &TetrixBoard::scoreChanged,
             scoreLcd, qOverload<int>(&QLCDNumber::display));
     connect(board, &TetrixBoard::levelChanged,
@@ -119,21 +106,18 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     connect(board,&TetrixBoard::timechanged,timeLcd,qOverload<const QString&>(&QLCDNumber::display));
 
 
-#endif
-//! [5]
-
-//! [6]
     QGridLayout *layout = new QGridLayout;
 
     layout->addWidget(createLabel(tr("TIME")), 0, 0);
     layout->addWidget(timeLcd, 1, 0);
     layout->addWidget(createLabel(tr("LEVEL")), 2, 0);
     layout->addWidget(levelLcd, 3, 0);
-    layout->addWidget(startButton, 4, 0);
+    layout->addWidget(startButton, 5, 0);
+    layout->addWidget(changeLevelButton, 4, 0);
     layout->addWidget(board, 0, 1, 6, 1);
     layout->addWidget(createLabel(tr("SCORE")), 0, 2);
     layout->addWidget(scoreLcd, 1, 2);
-    layout->addWidget(createLabel(tr("PIECES REMOVED")), 2, 2);
+    layout->addWidget(createLabel(tr("PIECES REDROPED")), 2, 2);
     layout->addWidget(linesLcd, 3, 2);
     layout->addWidget(quitButton, 4, 2);
     layout->addWidget(pauseButton, 5, 2);
@@ -142,13 +126,11 @@ TetrixWindow::TetrixWindow(QWidget *parent)
     setWindowTitle(tr("Tetrix"));
     resize(550, 370);
 }
-//! [6]
 
-//! [7]
 QLabel *TetrixWindow::createLabel(const QString &text)
 {
     QLabel *label = new QLabel(text);
     label->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     return label;
 }
-//! [7]
+

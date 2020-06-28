@@ -1,4 +1,5 @@
 #include"game.h"
+#include <QDebug>
 using namespace std;
 
 
@@ -6,6 +7,7 @@ Game::Game(TetrixBoard &t)
 {
     this->tboard = &t;
 }
+
 
 void Game::moveLeft()
 {
@@ -62,6 +64,22 @@ bool Game::isFilled(int i, int j)
     if(tboard->isFilled(i,j))
         return true;
     else return false;
+}
+
+void Game::levelchange()
+{
+    qDebug()<<__func__;
+    switch (level()) {
+    case TetrixBoard::Level:: easy:
+        level(TetrixBoard::Level::normal);
+        break;
+    case TetrixBoard::Level::normal:
+        level(TetrixBoard::Level::hard);
+        break;
+    case TetrixBoard::Level::hard:
+        level(TetrixBoard::Level::easy);
+        break;
+    }
 }
 
 

@@ -7,7 +7,6 @@ HEADERS       = tetrixboard.h \
                 tetrixwindow.h
 SOURCES       = main.cpp \
                 ai.cpp \
-                file.cpp \
                 game.cpp \
                 tetrixboard.cpp \
                 tetrixpiece.cpp \

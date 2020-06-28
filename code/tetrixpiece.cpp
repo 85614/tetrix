@@ -50,10 +50,111 @@
 
 #include "tetrixpiece.h"
 #include<stdlib.h>
-#include<qdebug.h>
 //#include <QtCore>
+#include<QFile>
+#include <QDebug>
+#include<QStringList>
+//! [0]
+//!
+
+void ReadLine()
+
+{
+   if(number==1)
+   { QFile file("D:\\test\\normal.txt");
+
+    if (file.open(QIODevice::ReadOnly ))
+    {
+        while (!file.atEnd())
+        {
+            QByteArray line = file.readLine();
+            QString str(line);
+            //fonts = str.split(" ");
+            //debug数据
+            //qDebug()<<"right";
+         QStringList list = str.split(" ");
+          fonts2<<list[0];
+          //时间
+          fonts<<list[1];
+          //方块
+         qDebug()<<list[1];
+         list.clear();
+        }
+        file.close();
+
+//        qDebug()<<"以下为fonts的某个位置的值";
+//        qDebug()<<fonts.at(5);
+//        //第六个值
+
+        number++;
+    }
+}
+
+}
+
+int returnmax()
+
+{
+    int a[5];
+    a[0]=fonts.lastIndexOf("s1\n");
+    a[1]=fonts.lastIndexOf("s2\n");
+    a[2]=fonts.lastIndexOf("s3\n");
+    a[3]=fonts.lastIndexOf("s4\n");
+    a[4]=fonts.lastIndexOf("s5\n");
+    int max=0;
+    for(int i=0;i<5;i++)
+    {if(a[i]>max)
+    max=a[i];}
+    return max;
+}
+
+int Returnpiece(int i)
+//根据方块数据得到相应方块
+{
+    if(fonts.at(i)=="s1\n")
+        return 1;
+    if(fonts.at(i)=="s2\n")
+        return 2;
+    if(fonts.at(i)=="s3\n")
+        return 3;
+    if(fonts.at(i)=="s4\n")
+        return 4;
+    if(fonts.at(i)=="s5\n")
+        return 5;
+    else {
+        return 0;
+    }
+}
+
+
+
+
+
 
 //! [0]
+
+void TetrixPiece::getnewShape()
+
+{   if(scii<returnmax())
+
+   { BlockShape ranShape = BlockShape(Returnpiece(scii));
+    scii++ ;
+    setShape(ranShape);}
+    else {
+      setShape(NoShape);
+    }
+    //debug时用的数据，可删除
+    //if(2*scii+1<returnmax())
+    //{ BlockShape ranShape = BlockShape(Returnpiece(2*scii+1));
+     //scii++ ;
+    // setShape(ranShape);}
+     //else {
+      // setShape(NoShape);
+    // }
+
+}
+
+
 void TetrixPiece::setRandomShape()
 {
     //随机设置一种形状，这里+1是为了跳过第一个NoShape

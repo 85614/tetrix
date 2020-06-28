@@ -2,6 +2,16 @@
 #ifndef TETRIXPIECE_H
 #define TETRIXPIECE_H
 
+#include<QStringList>
+static int scii=0;
+static int number=1;
+static QStringList fonts;
+static QStringList fonts2;
+
+int returnmax();
+int Returnpiece(int i);
+void ReadLine();
+
 enum BlockShape { NoShape,LineShape,LShape,TShape,ZShape,OShape };
 
 //! [0]
@@ -12,7 +22,7 @@ public:
 
     void setRandomShape();
     void setShape(BlockShape shape);
-
+    void getnewShape();
     BlockShape shape() const { return blockShape; }
     //得到某一行的X或Y坐标
     int getX(int index) const;
